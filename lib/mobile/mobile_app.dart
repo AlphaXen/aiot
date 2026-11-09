@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'mobile_theme.dart';
 import 'screens/home_shell.dart';
 
-/// 스마트폰 제어 웹앱.
+/// 캠퍼스 식당 혼잡도 · AI 추천 웹앱.
 /// 데스크톱 브라우저에서 열어도 폰 너비(최대 480px)로 가운데 정렬됩니다.
 class MobileApp extends StatelessWidget {
   const MobileApp({super.key});
@@ -11,7 +11,7 @@ class MobileApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'AIoT Home',
+      title: '캠퍼스 식당',
       debugShowCheckedModeBanner: false,
       theme: buildMobileTheme(Brightness.light),
       darkTheme: buildMobileTheme(Brightness.dark),

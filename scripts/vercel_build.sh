@@ -23,5 +23,5 @@ flutter --version
 flutter pub get
 flutter build web -t "lib/main_${TARGET}.dart" -o "build/web_${TARGET}" --release
 
-if [ "$TARGET" = "admin" ]; then TITLE="AIoT Console"; else TITLE="AIoT Home"; fi
+if [ "$TARGET" = "admin" ]; then TITLE="AIoT Console"; else TITLE="캠퍼스 식당"; fi
 sed -i "s|<title>AIoT</title>|<title>${TITLE}</title>|" "build/web_${TARGET}/index.html"

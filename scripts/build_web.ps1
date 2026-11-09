@@ -31,7 +31,7 @@ if (-not $Flutter) {
 Write-Host "Flutter: $Flutter" -ForegroundColor DarkGray
 
 $apps = @{
-  mobile = @{ Entry = 'lib/main_mobile.dart'; Title = 'AIoT Home';    Short = 'AIoT' }
+  mobile = @{ Entry = 'lib/main_mobile.dart'; Title = '캠퍼스 식당';  Short = '캠퍼스 식당' }
   admin  = @{ Entry = 'lib/main_admin.dart';  Title = 'AIoT Console'; Short = 'AIoT Admin' }
 }
 $targets = if ($Target -eq 'all') { @('mobile', 'admin') } else { @($Target) }

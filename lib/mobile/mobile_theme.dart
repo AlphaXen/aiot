@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
-/// One UI 느낌의 모바일 테마 (밝은 회색 배경 + 크게 둥근 흰 카드 + 파란 포인트)
+/// 밝은 회색 배경 + 크게 둥근 흰 카드 + 오렌지 포인트
 class MobileColors {
-  static const accent = Color(0xFF3E91FF);
+  static const accent = Color(0xFFFF7A1A);
+  static const ai = Color(0xFF6D5BFF);
+  static const ai2 = Color(0xFF3E91FF);
+  static const me = Color(0xFF3E91FF);
   static const lightBg = Color(0xFFF2F2F7);
   static const lightCard = Colors.white;
   static const darkBg = Color(0xFF000000);
   static const darkCard = Color(0xFF1C1C1E);
-  static const offline = Color(0xFFE5484D);
 }
 
 ThemeData buildMobileTheme(Brightness b) {
@@ -36,15 +38,7 @@ ThemeData buildMobileTheme(Brightness b) {
       color: dark ? MobileColors.darkCard : MobileColors.lightCard,
       elevation: 0,
       margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
-    ),
-    sliderTheme: SliderThemeData(
-      trackHeight: 28,
-      activeTrackColor: MobileColors.accent,
-      inactiveTrackColor: dark ? const Color(0xFF2C2C2E) : const Color(0xFFE5E5EA),
-      thumbColor: Colors.white,
-      overlayShape: SliderComponentShape.noOverlay,
-      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 11, elevation: 2),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
     ),
     switchTheme: SwitchThemeData(
       trackColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? MobileColors.accent : null),
@@ -61,6 +55,15 @@ ThemeData buildMobileTheme(Brightness b) {
 extension MobileCtx on BuildContext {
   bool get isDark => Theme.of(this).brightness == Brightness.dark;
   Color get cardColor => isDark ? MobileColors.darkCard : MobileColors.lightCard;
+  Color get bgColor => isDark ? MobileColors.darkBg : MobileColors.lightBg;
   Color get subtle => isDark ? const Color(0xFF8E8E93) : const Color(0xFF6E6E73);
   Color get inactiveFill => isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF0F0F3);
+  Color get fg => isDark ? Colors.white : Colors.black;
+}
+
+String hhmm(DateTime t) => '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+
+String won(int v) {
+  final s = v.toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',');
+  return '$s원';
 }
