@@ -26,10 +26,13 @@ enum Congestion {
 }
 
 class MenuItem {
-  const MenuItem(this.name, this.price, {this.tag});
-  final String name;
-  final int price;
-  final String? tag;
+  MenuItem(this.name, this.price, {this.tag});
+  String name;
+  int price;
+  String? tag;
+
+  /// 품절 여부 (관리자 화면에서 변경)
+  bool soldOut = false;
 }
 
 class Restaurant {
@@ -70,6 +73,9 @@ class Restaurant {
   final List<String> payments;
   bool favorite = false;
 
+  /// 혼잡도 센서 연결 상태 (끊기면 마지막 값 유지)
+  bool sensorOnline = true;
+
   double get ratio => occupied / seats;
   Congestion get congestion => Congestion.fromRatio(ratio);
 
@@ -104,7 +110,7 @@ class RestaurantStore extends ChangeNotifier {
       closeHour: 19,
       seats: 220,
       occupied: 198,
-      menus: const [
+      menus: [
         MenuItem('제육볶음 정식', 5500, tag: '인기'),
         MenuItem('된장찌개 백반', 5000),
         MenuItem('돈까스 카레', 5500),
@@ -124,7 +130,7 @@ class RestaurantStore extends ChangeNotifier {
       closeHour: 20,
       seats: 120,
       occupied: 34,
-      menus: const [
+      menus: [
         MenuItem('치즈 김치볶음밥', 5500, tag: '인기'),
         MenuItem('참치마요 덮밥', 5000),
         MenuItem('라볶이', 4500),
@@ -144,7 +150,7 @@ class RestaurantStore extends ChangeNotifier {
       closeHour: 21,
       seats: 60,
       occupied: 40,
-      menus: const [
+      menus: [
         MenuItem('클래식 치즈버거 세트', 7900, tag: '인기'),
         MenuItem('더블 베이컨 버거', 8900),
         MenuItem('치킨 텐더 세트', 7500),
@@ -164,7 +170,7 @@ class RestaurantStore extends ChangeNotifier {
       closeHour: 14,
       seats: 80,
       occupied: 70,
-      menus: const [
+      menus: [
         MenuItem('오늘의 정식', 7000, tag: '추천'),
         MenuItem('한우 국밥', 8000),
         MenuItem('연어 포케', 8500),
@@ -176,10 +182,14 @@ class RestaurantStore extends ChangeNotifier {
 
   Restaurant byId(String id) => restaurants.firstWhere((r) => r.id == id);
 
+  int get totalOccupied => restaurants.fold(0, (a, r) => a + r.occupied);
+  int get totalSeats => restaurants.fold(0, (a, r) => a + r.seats);
+
   /// 혼잡도 새로고침 (목업: 같은 단계 안에서 좌석 수만 조금씩 변동)
   Future<void> refresh() async {
     await Future<void>.delayed(const Duration(milliseconds: 500));
     for (final r in restaurants) {
+      if (!r.sensorOnline) continue;
       final next = (r.occupied + _rand.nextInt(9) - 4).clamp(0, r.seats);
       if (Congestion.fromRatio(next / r.seats) == r.congestion) r.occupied = next;
     }
@@ -192,8 +202,77 @@ class RestaurantStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// AI 추천.
-  /// TODO(개발 단계): 지금은 무조건 오렌지식당을 반환합니다.
-  /// 추후 [from] 위치와의 거리 + 혼잡도 점수로 가장 덜 혼잡하고 가까운 식당을 고르도록 교체하세요.
-  Restaurant recommend(LatLng from) => byId('orange');
+  // ---- 관리자 기능 ----
+
+  /// 좌석 사용 수 수동 보정
+  void setOccupied(Restaurant r, int occupied) {
+    r.occupied = occupied.clamp(0, r.seats);
+    updatedAt = DateTime.now();
+    notifyListeners();
+  }
+
+  void setSensorOnline(Restaurant r, bool online) {
+    r.sensorOnline = online;
+    notifyListeners();
+  }
+
+  void addMenu(Restaurant r, MenuItem m) {
+    r.menus.add(m);
+    notifyListeners();
+  }
+
+  void removeMenu(Restaurant r, MenuItem m) {
+    r.menus.remove(m);
+    notifyListeners();
+  }
+
+  void updateMenu(MenuItem m, {String? name, int? price, bool? soldOut}) {
+    if (name != null) m.name = name;
+    if (price != null) m.price = price;
+    if (soldOut != null) m.soldOut = soldOut;
+    notifyListeners();
+  }
+
+  // ---- AI 추천 ----
+
+  /// 개발 단계: 추천 결과를 이 식당으로 고정 (null 이면 점수 계산 사용)
+  String? fixedRecommendId = 'orange';
+
+  /// 점수 계산에서 혼잡도 비중 (0~1, 나머지는 거리)
+  double congestionWeight = 0.6;
+
+  /// 이 거리(m) 이상은 거리 점수 최하
+  double maxDistanceMeters = 800;
+
+  void updateAiSettings({Object? fixedId = _keep, double? weight, double? maxDistance}) {
+    if (fixedId != _keep) fixedRecommendId = fixedId as String?;
+    if (weight != null) congestionWeight = weight;
+    if (maxDistance != null) maxDistanceMeters = maxDistance;
+    notifyListeners();
+  }
+
+  /// 낮을수록 좋은 점수 (혼잡도 · 거리 가중합). 영업 중이 아니면 null.
+  double? score(Restaurant r, LatLng from) {
+    if (!r.isOpenAt(DateTime.now())) return null;
+    final d = const Distance().as(LengthUnit.Meter, from, r.position);
+    final dist = (d / maxDistanceMeters).clamp(0.0, 1.0);
+    return congestionWeight * r.ratio + (1 - congestionWeight) * dist;
+  }
+
+  /// 점수가 좋은 순서 (영업 종료 식당은 맨 뒤)
+  List<(Restaurant, double?)> ranking(LatLng from) {
+    final list = [for (final r in restaurants) (r, score(r, from))];
+    list.sort((a, b) => (a.$2 ?? 99).compareTo(b.$2 ?? 99));
+    return list;
+  }
+
+  /// AI 추천. 개발 단계 기본값은 [fixedRecommendId] = 오렌지식당 고정.
+  /// 고정을 해제하면 [from] 위치 기준 혼잡도 · 거리 점수가 가장 좋은 식당을 고릅니다.
+  Restaurant recommend(LatLng from) {
+    final fixed = fixedRecommendId;
+    if (fixed != null) return byId(fixed);
+    return ranking(from).first.$1;
+  }
 }
+
+const _keep = Object();

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../data/restaurant.dart';
+import '../../shared/restaurant.dart';
 import '../mobile_theme.dart';
 import '../widgets/campus_map.dart';
 import '../widgets/congestion.dart';
@@ -258,8 +258,24 @@ class _MenuCard extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Row(children: [
-                  Flexible(child: Text(m.name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700))),
-                  if (m.tag != null) ...[
+                  Flexible(
+                    child: Text(m.name,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: m.soldOut ? context.subtle : null,
+                          decoration: m.soldOut ? TextDecoration.lineThrough : null,
+                        )),
+                  ),
+                  if (m.soldOut) ...[
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(color: context.subtle, borderRadius: BorderRadius.circular(6)),
+                      child: const Text('품절', style: TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w800)),
+                    ),
+                  ],
+                  if (m.tag != null && !m.soldOut) ...[
                     const SizedBox(width: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),

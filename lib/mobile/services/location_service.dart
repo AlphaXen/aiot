@@ -1,7 +1,7 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
-import '../data/restaurant.dart';
+import '../../shared/restaurant.dart';
 
 class LocationResult {
   const LocationResult(this.position, {this.error});

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
-import '../data/restaurant.dart';
+import '../../shared/restaurant.dart';
 import '../mobile_theme.dart';
 
 /// OpenStreetMap 기반 캠퍼스 지도 (API 키 불필요)

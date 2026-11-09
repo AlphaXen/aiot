@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../data/restaurant.dart';
+import '../../shared/restaurant.dart';
 import '../mobile_theme.dart';
 import '../services/location_service.dart';
 import '../widgets/campus_map.dart';

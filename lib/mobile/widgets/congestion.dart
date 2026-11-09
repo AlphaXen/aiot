@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../data/restaurant.dart';
+import '../../shared/restaurant.dart';
 import '../mobile_theme.dart';
 
 /// 식당 원형 아이콘. 테두리 색 = 혼잡도 (초록 여유 / 노랑 혼잡 / 빨강 매우 혼잡)

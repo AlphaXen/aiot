@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
-import '../data/restaurant.dart';
+import '../../shared/restaurant.dart';
 import '../mobile_theme.dart';
 import '../services/location_service.dart';
 import '../widgets/campus_map.dart';

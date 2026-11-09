@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:aiot/admin/admin_app.dart';
-import 'package:aiot/mobile/data/restaurant.dart';
+import 'package:aiot/shared/restaurant.dart';
 import 'package:aiot/mobile/mobile_app.dart';
 import 'package:aiot/mobile/screens/restaurant_detail_screen.dart';
 
@@ -40,22 +40,37 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('관리자 대시보드: 개요와 기기 페이지', (tester) async {
+  testWidgets('관리자 대시보드: 개요와 모든 페이지', (tester) async {
     tester.view.physicalSize = const Size(1440, 1000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
     await tester.pumpWidget(const AdminApp());
-    expect(find.text('에너지 사용량'), findsOneWidget);
+    expect(find.text('식당별 실시간 혼잡도'), findsOneWidget);
+    expect(tester.takeException(), isNull);
 
-    await tester.tap(find.text('기기').first);
-    await tester.pumpAndSettle();
-    expect(find.text('기기 추가'), findsOneWidget);
-
-    for (final label in ['장소 · 방', '자동화', '멤버', '활동 로그', '펌웨어']) {
+    for (final label in ['식당 · 혼잡도', '메뉴 관리', 'IoT 센서', 'AI 추천 설정', '이용 통계', '활동 로그', '대시보드']) {
       await tester.tap(find.text(label).first);
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull, reason: label);
     }
+  });
+
+  testWidgets('관리자: 품절 처리가 공유 데이터에 반영', (tester) async {
+    final st = RestaurantStore.instance;
+    final m = st.byId('orange').menus.first;
+    st.updateMenu(m, soldOut: true);
+    expect(m.soldOut, isTrue);
+    st.updateMenu(m, soldOut: false);
+  });
+
+  test('AI 추천: 고정 해제 시 점수 기반 선택', () {
+    final st = RestaurantStore.instance;
+    expect(st.fixedRecommendId, 'orange');
+    st.updateAiSettings(fixedId: null);
+    final ranked = st.ranking(RestaurantStore.campusCenter);
+    expect(st.recommend(RestaurantStore.campusCenter), ranked.first.$1);
+    st.updateAiSettings(fixedId: 'orange');
+    expect(st.recommend(RestaurantStore.campusCenter).id, 'orange');
   });
 }

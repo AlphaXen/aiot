@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../data/restaurant.dart';
+import '../../shared/restaurant.dart';
 import '../mobile_theme.dart';
 import 'home_screen.dart';
 import 'home_shell.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// 관리자 대시보드용 토큰 (밝은 회색 캔버스 + 흰 패널 + 파란 포인트)
+/// 관리자 대시보드용 토큰 (밝은 회색 캔버스 + 흰 패널 + 오렌지 포인트, 사용자 앱과 동일)
 class AdminTokens {
   const AdminTokens._({
     required this.canvas,
@@ -16,7 +16,8 @@ class AdminTokens {
 
   final Color canvas, panel, border, text, textSub, textMuted, hover, series1, grid;
 
-  static const accent = Color(0xFF3E91FF);
+  static const accent = Color(0xFFF26B0F);
+  static const ai = Color(0xFF6D5BFF);
   static const good = Color(0xFF1E8E4E);
   static const warning = Color(0xFFB7791F);
   static const critical = Color(0xFFD93A3A);
@@ -28,7 +29,7 @@ class AdminTokens {
     text: Color(0xFF1D1D1F),
     textSub: Color(0xFF52514E),
     textMuted: Color(0xFF8A8D93),
-    hover: Color(0xFFF1F5FF),
+    hover: Color(0xFFFFF4EC),
     series1: Color(0xFF2A78D6),
     grid: Color(0xFFECEDEF),
   );
@@ -63,9 +64,18 @@ ThemeData buildAdminTheme(Brightness b) {
       filled: true,
       fillColor: t.panel,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: t.border)),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: t.border)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AdminTokens.accent, width: 1.5)),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: t.border),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: t.border),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: AdminTokens.accent, width: 1.5),
+      ),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
@@ -87,10 +97,17 @@ ThemeData buildAdminTheme(Brightness b) {
       trackColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? AdminTokens.accent : null),
       thumbColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? Colors.white : null),
     ),
-    dialogTheme: DialogThemeData(backgroundColor: t.panel, surfaceTintColor: Colors.transparent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18))),
+    dialogTheme: DialogThemeData(
+      backgroundColor: t.panel,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+    ),
     popupMenuTheme: PopupMenuThemeData(color: t.panel, surfaceTintColor: Colors.transparent),
     tooltipTheme: TooltipThemeData(
-      decoration: BoxDecoration(color: b == Brightness.dark ? const Color(0xFF2E3036) : const Color(0xFF1D1D1F), borderRadius: BorderRadius.circular(8)),
+      decoration: BoxDecoration(
+        color: b == Brightness.dark ? const Color(0xFF2E3036) : const Color(0xFF1D1D1F),
+        borderRadius: BorderRadius.circular(8),
+      ),
       textStyle: const TextStyle(color: Colors.white, fontSize: 12),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
     ),
