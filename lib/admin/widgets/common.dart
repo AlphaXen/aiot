@@ -260,10 +260,13 @@ class OccupancyBar extends StatelessWidget {
       child: SizedBox(
         height: height,
         child: Stack(
+          fit: StackFit.expand,
           children: [
-            Positioned.fill(child: ColoredBox(color: t.grid)),
+            ColoredBox(color: t.grid),
             FractionallySizedBox(
+              alignment: Alignment.centerLeft,
               widthFactor: ratio.clamp(0.02, 1.0),
+              heightFactor: 1,
               child: ColoredBox(color: Congestion.fromRatio(ratio).color),
             ),
           ],

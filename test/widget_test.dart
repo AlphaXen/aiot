@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:aiot/admin/admin_app.dart';
@@ -17,6 +18,17 @@ void main() {
     for (final name in ['학생식당', '오렌지식당', '뉴욕버거', '교수식당']) {
       expect(find.text(name), findsWidgets, reason: name);
     }
+  });
+
+  testWidgets('사용자 앱: 지도 탭이 화면 전체를 채움 (위쪽 띠로 줄어들던 버그)', (tester) async {
+    tester.view.physicalSize = const Size(390 * 3, 844 * 3);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(const MobileApp());
+    await tester.tap(find.text('지도'));
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.getSize(find.byType(FlutterMap)).height, greaterThan(700));
   });
 
   test('혼잡도 단계와 AI 추천(개발 단계: 오렌지식당 고정)', () {
