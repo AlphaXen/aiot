@@ -54,6 +54,8 @@ class _MapScreenState extends State<MapScreen> {
               me: _me,
               highlight: _selected,
               initialZoom: 17,
+              fitAll: true,
+              fitPadding: const EdgeInsets.fromLTRB(70, 110, 70, 90),
               onTapRestaurant: (r) {
                 setState(() => _selected = r);
                 _map.move(r.position, _map.camera.zoom);

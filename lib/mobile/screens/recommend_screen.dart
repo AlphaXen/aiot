@@ -60,7 +60,13 @@ class _RecommendScreenState extends State<RecommendScreen> {
         children: [
           Positioned.fill(
             child: pick == null || loc == null
-                ? CampusMap(restaurants: RestaurantStore.instance.restaurants, interactive: false, initialZoom: 16.5)
+                ? CampusMap(
+                    restaurants: RestaurantStore.instance.restaurants,
+                    interactive: false,
+                    initialZoom: 16.5,
+                    fitAll: true,
+                    fitPadding: const EdgeInsets.fromLTRB(70, 140, 70, 380),
+                  )
                 : CampusMap(
                     key: ValueKey(loc.position),
                     restaurants: RestaurantStore.instance.restaurants,

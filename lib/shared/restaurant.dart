@@ -63,7 +63,9 @@ class Restaurant {
 
   /// 건물·층 등 교내 위치 설명
   final String place;
-  final LatLng position;
+
+  /// 식당 위치. 서버(센서룸 rooms.js의 lat · lng)로 덮어씁니다.
+  LatLng position;
   final String openHours;
   final int openHour;
   final int closeHour;
@@ -101,8 +103,8 @@ class RestaurantStore extends ChangeNotifier {
   RestaurantStore._();
   static final instance = RestaurantStore._();
 
-  /// TODO: 실제 캠퍼스 좌표로 교체하세요. (GPS 실패 시 기본 위치로도 사용)
-  static const campusCenter = LatLng(37.5665, 126.9780);
+  /// 식당 4곳의 가운데. GPS를 못 쓸 때 기본 위치로도 사용합니다.
+  static const campusCenter = LatLng(36.79888, 127.074947);
 
   DateTime updatedAt = DateTime.now();
 
@@ -113,7 +115,7 @@ class RestaurantStore extends ChangeNotifier {
       category: '한식 · 백반',
       icon: Icons.rice_bowl_rounded,
       place: '학생회관 1층',
-      position: const LatLng(37.5672, 126.9772),
+      position: const LatLng(36.797520, 127.077506),
       openHours: '11:00 - 19:00',
       openHour: 11,
       closeHour: 19,
@@ -133,7 +135,7 @@ class RestaurantStore extends ChangeNotifier {
       category: '분식 · 덮밥',
       icon: Icons.ramen_dining_rounded,
       place: '공학관 지하 1층',
-      position: const LatLng(37.5659, 126.9788),
+      position: const LatLng(36.798259, 127.072388),
       openHours: '10:30 - 20:00',
       openHour: 10,
       closeHour: 20,
@@ -153,7 +155,7 @@ class RestaurantStore extends ChangeNotifier {
       category: '버거 · 양식',
       icon: Icons.lunch_dining_rounded,
       place: '중앙도서관 옆',
-      position: const LatLng(37.5677, 126.9790),
+      position: const LatLng(36.800239, 127.074679),
       openHours: '10:00 - 21:00',
       openHour: 10,
       closeHour: 21,
@@ -173,7 +175,7 @@ class RestaurantStore extends ChangeNotifier {
       category: '정식 · 일품',
       icon: Icons.restaurant_rounded,
       place: '본관 2층',
-      position: const LatLng(37.5668, 126.9766),
+      position: const LatLng(36.800239, 127.074679),
       openHours: '11:30 - 14:00',
       openHour: 11,
       closeHour: 14,
@@ -198,17 +200,30 @@ class RestaurantStore extends ChangeNotifier {
   Future<void> refresh() => AiotServer.instance.refresh();
 
   /// 서버에서 받은 실시간 인원 반영 (AiotServer가 호출)
-  void applyLive(String id, int count, {int? cap}) {
+  void applyLive(String id, int count, {int? cap, LatLng? position}) {
     final i = restaurants.indexWhere((r) => r.id == id);
     if (i < 0) return;
     final r = restaurants[i];
     final seats = cap != null && cap > 0 ? cap : r.seats;
-    if (r.occupied == count && r.seats == seats && r.sensorOnline) return;
+    final pos = position ?? r.position;
+    if (r.occupied == count && r.seats == seats && r.position == pos && r.sensorOnline) return;
     r
       ..occupied = count < 0 ? 0 : count
       ..seats = seats
+      ..position = pos
       ..sensorOnline = true;
     notifyListeners();
+  }
+
+  /// 같은 좌표(같은 건물)에 있는 식당끼리 묶음. 지도에서 마커를 하나로 합칠 때 사용.
+  static List<List<Restaurant>> groupByPosition(Iterable<Restaurant> list) {
+    final groups = <String, List<Restaurant>>{};
+    for (final r in list) {
+      // 소수 5자리 ≈ 1m
+      final key = '${r.position.latitude.toStringAsFixed(5)},${r.position.longitude.toStringAsFixed(5)}';
+      groups.putIfAbsent(key, () => []).add(r);
+    }
+    return groups.values.toList();
   }
 
   void markSynced(DateTime t) {

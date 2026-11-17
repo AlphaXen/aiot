@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:latlong2/latlong.dart';
 
 import 'restaurant.dart';
 
@@ -35,7 +36,7 @@ enum SpyConn { connecting, online, error }
 enum RemoveResult { caught, alreadyGone, failed }
 
 /// 센서룸 서버(/api/state)를 3초마다 읽어 두 기능에 반영합니다.
-/// - 식당 혼잡도: 테스터에서 ＋/− 한 인원(count)과 수용 인원(cap) → [RestaurantStore.applyLive]
+/// - 식당 혼잡도 · 위치: 테스터에서 ＋/− 한 인원(count), 수용 인원(cap), 좌표(lat · lng) → [RestaurantStore.applyLive]
 /// - 몰카 탐지: 설치된 몰카(camera). 앱에서 찾은 몰카는 '수거'로 보고하고,
 ///   서버가 SSE로 camera_removed 를 뿌리면 시뮬레이터 화면에서 귀신이 잡히는 애니메이션이 재생됩니다.
 class AiotServer extends ChangeNotifier {
@@ -108,7 +109,13 @@ class AiotServer extends ChangeNotifier {
     r.updatedAt = DateTime.tryParse(s['updated_at'] as String? ?? '');
     final count = s['count'];
     if (count is num) {
-      RestaurantStore.instance.applyLive(r.restaurantId, count.toInt(), cap: (s['cap'] as num?)?.toInt());
+      final lat = s['lat'], lng = s['lng'];
+      RestaurantStore.instance.applyLive(
+        r.restaurantId,
+        count.toInt(),
+        cap: (s['cap'] as num?)?.toInt(),
+        position: lat is num && lng is num ? LatLng(lat.toDouble(), lng.toDouble()) : null,
+      );
     }
   }
 
