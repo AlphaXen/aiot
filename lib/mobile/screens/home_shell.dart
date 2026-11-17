@@ -5,7 +5,7 @@ import 'home_screen.dart';
 import 'map_screen.dart';
 import 'my_screen.dart';
 import 'spycam_screen.dart';
-import '../services/spycam_service.dart';
+import '../../shared/aiot_server.dart';
 
 /// 하단 탭 4개: 홈(식당 찾기) · 지도 · 몰카 탐지 · MY
 class HomeShell extends StatefulWidget {
@@ -21,12 +21,12 @@ class _HomeShellState extends State<HomeShell> {
   @override
   void initState() {
     super.initState();
-    SpycamService.instance.start(); // 몰카 경보는 어느 탭에 있든 받기
+    AiotServer.instance.start(); // 몰카 경보는 어느 탭에 있든 받기
   }
 
   @override
   void dispose() {
-    SpycamService.instance.stop();
+    AiotServer.instance.stop();
     super.dispose();
   }
 

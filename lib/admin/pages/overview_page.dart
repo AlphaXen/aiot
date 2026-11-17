@@ -342,7 +342,7 @@ class _Legend extends StatelessWidget {
             ],
           ],
         ),
-        Text('여유 < 50% ≤ 혼잡 < 80% ≤ 매우 혼잡', style: TextStyle(fontSize: 12, color: t.textMuted)),
+        Text('여유 < 60% ≤ 혼잡 < 85% ≤ 매우 혼잡', style: TextStyle(fontSize: 12, color: t.textMuted)),
       ],
     );
   }

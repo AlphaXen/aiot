@@ -1,7 +1,7 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
+
+import 'aiot_server.dart';
 
 /// 혼잡도 3단계 (원형 아이콘 테두리 색으로 표시)
 enum Congestion {
@@ -18,9 +18,10 @@ enum Congestion {
   /// 흰 배경 위 글자용(노랑은 가독성이 낮아 한 톤 진하게)
   final Color textColor;
 
+  /// 센서룸 테스터와 같은 기준: 60% 미만 여유(테스터의 여유 · 보통) · 85% 미만 혼잡 · 그 이상 매우 혼잡
   static Congestion fromRatio(double r) {
-    if (r >= 0.8) return Congestion.veryBusy;
-    if (r >= 0.5) return Congestion.busy;
+    if (r >= 0.85) return Congestion.veryBusy;
+    if (r >= 0.6) return Congestion.busy;
     return Congestion.relaxed;
   }
 }
@@ -64,7 +65,10 @@ class Restaurant {
   final String openHours;
   final int openHour;
   final int closeHour;
-  final int seats;
+  /// 수용 인원. 서버(센서룸 테스터)의 cap으로 덮어씁니다.
+  int seats;
+
+  /// 현재 인원. 테스터에서 정원보다 10명까지 더 들어올 수 있어 seats를 넘을 수 있습니다.
   int occupied;
   final List<MenuItem> menus;
 
@@ -76,7 +80,10 @@ class Restaurant {
   /// 혼잡도 센서 연결 상태 (끊기면 마지막 값 유지)
   bool sensorOnline = true;
 
-  double get ratio => occupied / seats;
+  double get ratio => seats <= 0 ? 0 : (occupied / seats).clamp(0.0, 1.0);
+
+  /// 정원 초과 (테스터의 '정원 초과' 배지와 같은 조건)
+  bool get overCapacity => occupied > seats;
   Congestion get congestion => Congestion.fromRatio(ratio);
 
   /// 좌석 점유율로 추정한 대기 시간(분)
@@ -86,7 +93,8 @@ class Restaurant {
 }
 
 /// 식당 혼잡도 저장소.
-/// 개발 단계라 목업 데이터를 사용합니다. 실제 IoT 센서/서버 연동 시 [refresh]만 교체하면 됩니다.
+/// 아래 목록은 서버에 연결되기 전의 초기값이고, 연결되면 [AiotServer]가 3초마다
+/// 센서룸 서버의 인원 · 수용 인원으로 [applyLive] 합니다 (테스터에서 ＋/− 하면 바로 반영).
 class RestaurantStore extends ChangeNotifier {
   RestaurantStore._();
   static final instance = RestaurantStore._();
@@ -94,7 +102,6 @@ class RestaurantStore extends ChangeNotifier {
   /// TODO: 실제 캠퍼스 좌표로 교체하세요. (GPS 실패 시 기본 위치로도 사용)
   static const campusCenter = LatLng(37.5665, 126.9780);
 
-  final _rand = Random();
   DateTime updatedAt = DateTime.now();
 
   final List<Restaurant> restaurants = [
@@ -185,15 +192,33 @@ class RestaurantStore extends ChangeNotifier {
   int get totalOccupied => restaurants.fold(0, (a, r) => a + r.occupied);
   int get totalSeats => restaurants.fold(0, (a, r) => a + r.seats);
 
-  /// 혼잡도 새로고침 (목업: 같은 단계 안에서 좌석 수만 조금씩 변동)
-  Future<void> refresh() async {
-    await Future<void>.delayed(const Duration(milliseconds: 500));
+  /// 혼잡도 새로고침: 센서룸 서버에서 지금 인원을 다시 읽습니다.
+  Future<void> refresh() => AiotServer.instance.refresh();
+
+  /// 서버에서 받은 실시간 인원 반영 (AiotServer가 호출)
+  void applyLive(String id, int count, {int? cap}) {
+    final i = restaurants.indexWhere((r) => r.id == id);
+    if (i < 0) return;
+    final r = restaurants[i];
+    final seats = cap != null && cap > 0 ? cap : r.seats;
+    if (r.occupied == count && r.seats == seats && r.sensorOnline) return;
+    r
+      ..occupied = count < 0 ? 0 : count
+      ..seats = seats
+      ..sensorOnline = true;
+    notifyListeners();
+  }
+
+  void markSynced(DateTime t) {
+    updatedAt = t;
+    notifyListeners();
+  }
+
+  void setAllSensorsOnline(bool online) {
+    if (restaurants.every((r) => r.sensorOnline == online)) return;
     for (final r in restaurants) {
-      if (!r.sensorOnline) continue;
-      final next = (r.occupied + _rand.nextInt(9) - 4).clamp(0, r.seats);
-      if (Congestion.fromRatio(next / r.seats) == r.congestion) r.occupied = next;
+      r.sensorOnline = online;
     }
-    updatedAt = DateTime.now();
     notifyListeners();
   }
 

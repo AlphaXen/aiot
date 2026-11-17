@@ -27,7 +27,7 @@ class _RestaurantsPageState extends State<RestaurantsPage> {
       children: [
         PageHeader(
           title: '식당 · 혼잡도',
-          description: '좌석 사용률 50% 미만 여유 · 80% 미만 혼잡 · 그 이상 매우 혼잡으로 사용자 앱에 표시됩니다',
+          description: '좌석 사용률 60% 미만 여유 · 85% 미만 혼잡 · 그 이상 매우 혼잡으로 사용자 앱에 표시됩니다',
           actions: [
             OutlinedButton.icon(
               onPressed: () async {

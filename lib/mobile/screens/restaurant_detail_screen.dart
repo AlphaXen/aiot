@@ -161,7 +161,7 @@ class _NowCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final r = restaurant;
     final c = r.congestion;
-    final empty = r.seats - r.occupied;
+    final empty = r.overCapacity ? 0 : r.seats - r.occupied;
     Widget stat(String v, String l) => Expanded(
       child: Column(
         children: [
@@ -193,7 +193,7 @@ class _NowCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 5),
                 child: Text(
-                  '좌석 ${(r.ratio * 100).round()}% 사용 중',
+                  r.overCapacity ? '정원 초과 · ${r.occupied}명' : '${r.occupied}명 · ${(r.ratio * 100).round()}% 사용 중',
                   style: TextStyle(color: context.subtle, fontWeight: FontWeight.w600),
                 ),
               ),

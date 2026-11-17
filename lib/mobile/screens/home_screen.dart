@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../shared/restaurant.dart';
 import '../mobile_theme.dart';
-import '../services/spycam_service.dart';
+import '../../shared/aiot_server.dart';
 import '../widgets/congestion.dart';
 import 'home_shell.dart';
 import 'recommend_screen.dart';
@@ -165,7 +165,7 @@ class _SpycamBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final svc = SpycamService.instance;
+    final svc = AiotServer.instance;
     return ListenableBuilder(
       listenable: svc,
       builder: (context, _) {

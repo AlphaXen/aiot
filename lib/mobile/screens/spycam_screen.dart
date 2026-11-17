@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../shared/restaurant.dart';
 import '../mobile_theme.dart';
-import '../services/spycam_service.dart';
+import '../../shared/aiot_server.dart';
 import 'home_shell.dart';
 import 'spycam_scan_screen.dart';
 
@@ -20,7 +20,7 @@ class SpycamScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final svc = SpycamService.instance;
+    final svc = AiotServer.instance;
     return ListenableBuilder(
       listenable: svc,
       builder: (context, _) {

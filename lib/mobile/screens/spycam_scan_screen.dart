@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../services/spycam_detector.dart';
-import '../services/spycam_service.dart';
+import '../../shared/aiot_server.dart';
 
 /// 카메라로 몰래카메라를 찍어서 인식되면 서버에 '수거'를 보고 → 시뮬레이터에서 귀신이 잡힙니다.
 ///
@@ -22,7 +22,7 @@ class SpycamScanScreen extends StatefulWidget {
 class _SpycamScanScreenState extends State<SpycamScanScreen> {
   static const _danger = Color(0xFFEF4444);
 
-  final _svc = SpycamService.instance;
+  final _svc = AiotServer.instance;
   CameraController? _cam;
   String? _error;
   String? _roomId;
