@@ -3,10 +3,11 @@ import 'package:latlong2/latlong.dart';
 
 import 'aiot_server.dart';
 
-/// 혼잡도 3단계 (원형 아이콘 테두리 색으로 표시)
+/// 혼잡도 4단계 (원형 아이콘 테두리 색으로 표시). 센서룸 테스터와 같은 단계 · 같은 기준.
 enum Congestion {
   relaxed('여유', Color(0xFF22C55E), Color(0xFF16A34A)),
-  busy('혼잡', Color(0xFFFACC15), Color(0xFFCA8A04)),
+  normal('보통', Color(0xFFFACC15), Color(0xFFCA8A04)),
+  busy('혼잡', Color(0xFFF97316), Color(0xFFEA580C)),
   veryBusy('매우 혼잡', Color(0xFFEF4444), Color(0xFFDC2626));
 
   const Congestion(this.label, this.color, this.textColor);
@@ -18,11 +19,12 @@ enum Congestion {
   /// 흰 배경 위 글자용(노랑은 가독성이 낮아 한 톤 진하게)
   final Color textColor;
 
-  /// 센서룸 테스터와 같은 기준: 60% 미만 여유(테스터의 여유 · 보통) · 85% 미만 혼잡 · 그 이상 매우 혼잡
+  /// 40%까지 여유 · 60%까지 보통 · 80%까지 혼잡 · 그 이상 매우 혼잡
   static Congestion fromRatio(double r) {
-    if (r >= 0.85) return Congestion.veryBusy;
-    if (r >= 0.6) return Congestion.busy;
-    return Congestion.relaxed;
+    if (r <= 0.4) return Congestion.relaxed;
+    if (r <= 0.6) return Congestion.normal;
+    if (r <= 0.8) return Congestion.busy;
+    return Congestion.veryBusy;
   }
 }
 
@@ -115,8 +117,8 @@ class RestaurantStore extends ChangeNotifier {
       openHours: '11:00 - 19:00',
       openHour: 11,
       closeHour: 19,
-      seats: 220,
-      occupied: 198,
+      seats: 60,
+      occupied: 54,
       menus: [
         MenuItem('제육볶음 정식', 5500, tag: '인기'),
         MenuItem('된장찌개 백반', 5000),
@@ -135,8 +137,8 @@ class RestaurantStore extends ChangeNotifier {
       openHours: '10:30 - 20:00',
       openHour: 10,
       closeHour: 20,
-      seats: 120,
-      occupied: 34,
+      seats: 80,
+      occupied: 22,
       menus: [
         MenuItem('치즈 김치볶음밥', 5500, tag: '인기'),
         MenuItem('참치마요 덮밥', 5000),
@@ -155,8 +157,8 @@ class RestaurantStore extends ChangeNotifier {
       openHours: '10:00 - 21:00',
       openHour: 10,
       closeHour: 21,
-      seats: 60,
-      occupied: 40,
+      seats: 40,
+      occupied: 27,
       menus: [
         MenuItem('클래식 치즈버거 세트', 7900, tag: '인기'),
         MenuItem('더블 베이컨 버거', 8900),
@@ -175,8 +177,8 @@ class RestaurantStore extends ChangeNotifier {
       openHours: '11:30 - 14:00',
       openHour: 11,
       closeHour: 14,
-      seats: 80,
-      occupied: 70,
+      seats: 50,
+      occupied: 44,
       menus: [
         MenuItem('오늘의 정식', 7000, tag: '추천'),
         MenuItem('한우 국밥', 8000),

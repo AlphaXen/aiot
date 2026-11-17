@@ -47,7 +47,8 @@ void main() {
 
   test('혼잡도 단계와 AI 추천(개발 단계: 오렌지식당 고정)', () {
     expect(Congestion.fromRatio(0.3), Congestion.relaxed);
-    expect(Congestion.fromRatio(0.6), Congestion.busy);
+    expect(Congestion.fromRatio(0.5), Congestion.normal);
+    expect(Congestion.fromRatio(0.7), Congestion.busy);
     expect(Congestion.fromRatio(0.9), Congestion.veryBusy);
     final store = RestaurantStore.instance;
     expect(store.recommend(RestaurantStore.campusCenter).name, '오렌지식당');
