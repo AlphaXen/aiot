@@ -5,9 +5,10 @@ import 'home_screen.dart';
 import 'map_screen.dart';
 import 'my_screen.dart';
 import 'spycam_screen.dart';
+import 'study_screen.dart';
 import '../../shared/aiot_server.dart';
 
-/// 하단 탭 4개: 홈(식당 찾기) · 지도 · 몰카 탐지 · MY
+/// 하단 탭 5개: 홈(식당 찾기) · 지도 · 공부 공간 · 몰카 탐지 · MY
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
 
@@ -33,6 +34,7 @@ class _HomeShellState extends State<HomeShell> {
   static const _tabs = [
     (Icons.home_outlined, Icons.home_rounded, '홈'),
     (Icons.map_outlined, Icons.map_rounded, '지도'),
+    (Icons.local_library_outlined, Icons.local_library_rounded, '공부 공간'),
     (Icons.shield_outlined, Icons.shield_rounded, '몰카 탐지'),
     (Icons.person_outline_rounded, Icons.person_rounded, 'MY'),
   ];
@@ -47,9 +49,11 @@ class _HomeShellState extends State<HomeShell> {
         children: [
           HomeScreen(
             onOpenMap: () => setState(() => _index = 1),
-            onOpenSpycam: () => setState(() => _index = 2),
+            onOpenStudy: () => setState(() => _index = 2),
+            onOpenSpycam: () => setState(() => _index = 3),
           ),
           const MapScreen(),
+          const StudyScreen(),
           const SpycamScreen(),
           const MyScreen(),
         ],

@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
 import 'restaurant.dart';
+import 'study.dart';
 
 /// 센서룸 시뮬레이터(D:\html\aiot)와 같은 Railway 서버.
 /// 로컬 서버로 테스트: flutter run --dart-define=AIOT_API=http://localhost:3000
@@ -115,6 +116,12 @@ class AiotServer extends ChangeNotifier {
         count.toInt(),
         cap: (s['cap'] as num?)?.toInt(),
         position: lat is num && lng is num ? LatLng(lat.toDouble(), lng.toDouble()) : null,
+      );
+      RestaurantStore.instance.applyEnv(
+        r.restaurantId,
+        EnvReading.fromJson(s['sensors']),
+        DateTime.tryParse(s['sensors_at'] as String? ?? ''),
+        ((s['sensor_override'] as Map?)?.keys.cast<String>() ?? const <String>[]).toSet(),
       );
     }
   }

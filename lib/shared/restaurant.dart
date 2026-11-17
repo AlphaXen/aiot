@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'aiot_server.dart';
+import 'study.dart';
 
 /// 혼잡도 4단계 (원형 아이콘 테두리 색으로 표시). 센서룸 테스터와 같은 단계 · 같은 기준.
 enum Congestion {
@@ -83,6 +85,13 @@ class Restaurant {
 
   /// 혼잡도 센서 연결 상태 (끊기면 마지막 값 유지)
   bool sensorOnline = true;
+
+  /// 환경 센서 (소음 · CO₂ · 온도 · 습도). 센서룸 테스터가 서버로 5초마다 보냄. 없으면 null.
+  EnvReading? env;
+  DateTime? envAt;
+
+  /// 테스터에서 직접 고정한 센서 키 (noise · co2 · temp · hum)
+  Set<String> envManual = const {};
 
   double get ratio => seats <= 0 ? 0 : (occupied / seats).clamp(0.0, 1.0);
 
@@ -212,6 +221,19 @@ class RestaurantStore extends ChangeNotifier {
       ..seats = seats
       ..position = pos
       ..sensorOnline = true;
+    notifyListeners();
+  }
+
+  /// 서버에서 받은 환경 센서 값 반영 (AiotServer가 호출)
+  void applyEnv(String id, EnvReading? env, DateTime? at, Set<String> manual) {
+    final i = restaurants.indexWhere((r) => r.id == id);
+    if (i < 0) return;
+    final r = restaurants[i];
+    if (r.env == env && r.envAt == at && setEquals(r.envManual, manual)) return;
+    r
+      ..env = env
+      ..envAt = at
+      ..envManual = manual;
     notifyListeners();
   }
 

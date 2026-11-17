@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../shared/restaurant.dart';
+import '../../shared/study.dart';
 import '../mobile_theme.dart';
 import '../../shared/aiot_server.dart';
 import '../widgets/congestion.dart';
@@ -9,8 +10,9 @@ import 'recommend_screen.dart';
 import 'restaurant_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.onOpenMap, required this.onOpenSpycam});
+  const HomeScreen({super.key, required this.onOpenMap, required this.onOpenSpycam, required this.onOpenStudy});
   final VoidCallback onOpenMap;
+  final VoidCallback onOpenStudy;
   final VoidCallback onOpenSpycam;
 
   @override
@@ -39,6 +41,10 @@ class _HomeScreenState extends State<HomeScreen> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                 child: _SpycamBanner(onTap: widget.onOpenSpycam),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: _StudyBanner(onTap: widget.onOpenStudy),
               ),
               const Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: AiRecommendCard()),
               SectionTitle(
@@ -159,6 +165,60 @@ class _Header extends StatelessWidget {
 }
 
 /// 몰카 탐지 상태 한 줄 (몰카 신호가 있으면 빨갛게)
+/// 지금 공부하기 가장 좋은 곳 한 줄
+class _StudyBanner extends StatelessWidget {
+  const _StudyBanner({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: RestaurantStore.instance,
+      builder: (context, _) {
+        final best = StudyComfort.rank(RestaurantStore.instance.restaurants).first;
+        final ok = best.level != StudyLevel.poor;
+        return Material(
+          color: context.cardColor,
+          borderRadius: BorderRadius.circular(18),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(18),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+              child: Row(
+                children: [
+                  Icon(Icons.local_library_rounded, color: ok ? best.level.color : context.subtle, size: 24),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          ok ? '공부하기 좋은 곳: ${best.restaurant.name} · ${best.level.label}' : '지금은 조용한 공부 공간이 없어요',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5),
+                        ),
+                        Text(
+                          ok ? best.summary : '소음 · 빈 좌석을 실시간으로 확인 중이에요',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 12.5, color: context.subtle),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(Icons.chevron_right_rounded, color: context.subtle),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _SpycamBanner extends StatelessWidget {
   const _SpycamBanner({required this.onTap});
   final VoidCallback onTap;
