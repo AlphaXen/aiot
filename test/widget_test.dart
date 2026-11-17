@@ -31,6 +31,20 @@ void main() {
     expect(tester.getSize(find.byType(FlutterMap)).height, greaterThan(700));
   });
 
+  testWidgets('사용자 앱: 몰카 탐지 탭', (tester) async {
+    tester.view.physicalSize = const Size(390 * 3, 844 * 3);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(const MobileApp());
+    expect(find.text('몰래카메라 감시 중 · 모두 안전'), findsOneWidget); // 홈 배너
+    await tester.tap(find.text('몰카 탐지'));
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('몰래카메라 찾기'), findsOneWidget);
+    expect(find.text('식당별 RF 감시'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   test('혼잡도 단계와 AI 추천(개발 단계: 오렌지식당 고정)', () {
     expect(Congestion.fromRatio(0.3), Congestion.relaxed);
     expect(Congestion.fromRatio(0.6), Congestion.busy);

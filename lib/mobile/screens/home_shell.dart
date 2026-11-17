@@ -4,8 +4,10 @@ import '../mobile_theme.dart';
 import 'home_screen.dart';
 import 'map_screen.dart';
 import 'my_screen.dart';
+import 'spycam_screen.dart';
+import '../services/spycam_service.dart';
 
-/// 하단 탭 3개: 홈 · 지도 · MY
+/// 하단 탭 4개: 홈(식당 찾기) · 지도 · 몰카 탐지 · MY
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
 
@@ -16,9 +18,22 @@ class HomeShell extends StatefulWidget {
 class _HomeShellState extends State<HomeShell> {
   int _index = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    SpycamService.instance.start(); // 몰카 경보는 어느 탭에 있든 받기
+  }
+
+  @override
+  void dispose() {
+    SpycamService.instance.stop();
+    super.dispose();
+  }
+
   static const _tabs = [
     (Icons.home_outlined, Icons.home_rounded, '홈'),
     (Icons.map_outlined, Icons.map_rounded, '지도'),
+    (Icons.shield_outlined, Icons.shield_rounded, '몰카 탐지'),
     (Icons.person_outline_rounded, Icons.person_rounded, 'MY'),
   ];
 
@@ -30,8 +45,12 @@ class _HomeShellState extends State<HomeShell> {
         sizing: StackFit.expand,
         index: _index,
         children: [
-          HomeScreen(onOpenMap: () => setState(() => _index = 1)),
+          HomeScreen(
+            onOpenMap: () => setState(() => _index = 1),
+            onOpenSpycam: () => setState(() => _index = 2),
+          ),
           const MapScreen(),
+          const SpycamScreen(),
           const MyScreen(),
         ],
       ),

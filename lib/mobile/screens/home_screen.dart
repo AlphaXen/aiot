@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 
 import '../../shared/restaurant.dart';
 import '../mobile_theme.dart';
+import '../services/spycam_service.dart';
 import '../widgets/congestion.dart';
 import 'home_shell.dart';
 import 'recommend_screen.dart';
 import 'restaurant_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.onOpenMap});
+  const HomeScreen({super.key, required this.onOpenMap, required this.onOpenSpycam});
   final VoidCallback onOpenMap;
+  final VoidCallback onOpenSpycam;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -34,6 +36,10 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: EdgeInsets.zero,
             children: [
               const _Header(),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: _SpycamBanner(onTap: widget.onOpenSpycam),
+              ),
               const Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: AiRecommendCard()),
               SectionTitle(
                 '실시간 혼잡도',
@@ -128,7 +134,7 @@ class _Header extends StatelessWidget {
                       const Icon(Icons.place_rounded, size: 16, color: MobileColors.accent),
                       const SizedBox(width: 3),
                       Text(
-                        '캠퍼스 식당',
+                        '캠퍼스 AIoT',
                         style: TextStyle(fontSize: 14, color: context.subtle, fontWeight: FontWeight.w600),
                       ),
                     ],
@@ -148,6 +154,64 @@ class _Header extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// 몰카 탐지 상태 한 줄 (몰카 신호가 있으면 빨갛게)
+class _SpycamBanner extends StatelessWidget {
+  const _SpycamBanner({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final svc = SpycamService.instance;
+    return ListenableBuilder(
+      listenable: svc,
+      builder: (context, _) {
+        final planted = svc.planted;
+        final alarm = planted.isNotEmpty;
+        const red = Color(0xFFEF4444);
+        return Material(
+          color: alarm ? red.withValues(alpha: context.isDark ? 0.22 : 0.1) : context.cardColor,
+          borderRadius: BorderRadius.circular(18),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(18),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+              child: Row(
+                children: [
+                  Icon(
+                    alarm ? Icons.warning_amber_rounded : Icons.shield_rounded,
+                    color: alarm ? red : const Color(0xFF22C55E),
+                    size: 24,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          alarm ? '${planted.map((r) => r.name).join(', ')} 몰카 신호 감지' : '몰래카메라 감시 중 · 모두 안전',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5, color: alarm ? red : null),
+                        ),
+                        Text(
+                          alarm ? '카메라로 찍어서 귀신을 잡아 주세요' : '식당 4곳의 RF 센서를 실시간으로 확인해요',
+                          style: TextStyle(fontSize: 12.5, color: context.subtle),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(Icons.chevron_right_rounded, color: context.subtle),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
