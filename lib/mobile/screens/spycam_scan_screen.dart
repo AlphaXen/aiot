@@ -9,7 +9,7 @@ import '../../shared/aiot_server.dart';
 
 /// 카메라로 몰래카메라를 찍어서 인식되면 서버에 '수거'를 보고 → 시뮬레이터에서 귀신이 잡힙니다.
 ///
-/// 미리보기 중에는 0.3초마다 한 장씩 분석해 조준선 안의 빨간 불빛을 표시하고,
+/// 미리보기 중에는 0.3초마다 한 장씩 분석해 조준선 안의 몰카(검은 몸체 + 렌즈 + 켜진 LED)를 표시하고,
 /// 촬영 버튼을 누르면 0.2초 간격으로 최대 4장을 찍어 판정합니다 (LED가 깜박여서 한 장이면 놓칠 수 있음).
 class SpycamScanScreen extends StatefulWidget {
   const SpycamScanScreen({super.key, this.roomId});
@@ -136,7 +136,7 @@ class _SpycamScanScreenState extends State<SpycamScanScreen> {
 
     if (!det.found) {
       setState(() => _shooting = false);
-      _snack('빨간 불빛이 보이지 않아요. 몰카를 조준선 안에 크게 담아 다시 찍어 보세요.');
+      _snack('몰카를 인식하지 못했어요. 검은 몸체 · 렌즈 · 빨간 LED가 모두 조준선 안에 또렷이 보이게 다가가서 다시 찍어 보세요.');
       return;
     }
 
@@ -241,11 +241,11 @@ class _SpycamScanScreenState extends State<SpycamScanScreen> {
     } else if (_shooting) {
       hint = '분석 중…';
     } else if (found) {
-      hint = '빨간 불빛 포착! 지금 촬영하세요';
+      hint = '몰카 포착! 지금 촬영하세요';
     } else if (room == null || !room.planted) {
       hint = '신고된 몰카가 없어요 · 연습 모드로 탐지만 해요';
     } else {
-      hint = '${room.name} 책상 밑의 빨간 불빛을 조준선 안에 담으세요';
+      hint = '${room.name} 책상 밑 몰카(빨간 LED가 켜진 검은 카메라)를 조준선 안에 담으세요';
     }
     return SafeArea(
       top: false,
@@ -292,7 +292,7 @@ class _SpycamScanScreenState extends State<SpycamScanScreen> {
   }
 }
 
-/// 조준선 모서리 + 찾은 불빛 위치 원
+/// 조준선 모서리 + 찾은 몰카 위치 원
 class _AimPainter extends CustomPainter {
   _AimPainter({required this.det, required this.color});
   final SpyDetection det;
@@ -398,7 +398,7 @@ class _ResultSheet extends StatelessWidget {
       null => (
         Icons.search_rounded,
         const Color(0xFFF59E0B),
-        '몰카로 보이는 불빛을 찾았어요',
+        '몰카를 찾았어요',
         room == null
             ? '현재 몰카가 설치된 식당이 없어요. 센서룸에서 \'귀신 출몰\'을 누른 뒤 다시 해 보세요.'
             : '${room!.name}에는 신고된 몰카가 없어요. 위에서 식당을 바꿔 보세요.',

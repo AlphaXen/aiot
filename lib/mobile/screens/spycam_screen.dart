@@ -164,7 +164,7 @@ class _AlertCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             alarm
-                ? '책상 밑의 빨간 불빛을 카메라로 찍으면\n몰카를 수거하고 귀신을 잡을 수 있어요'
+                ? '책상 밑의 몰카를 카메라로 찍으면\n몰카를 수거하고 귀신을 잡을 수 있어요'
                 : '센서룸에서 귀신이 몰카를 설치하면 바로 알려 드려요',
             style: TextStyle(color: Colors.white.withValues(alpha: 0.88), fontSize: 14, height: 1.4),
           ),
@@ -235,7 +235,7 @@ class _HowTo extends StatelessWidget {
     const steps = [
       (Icons.sensors_rounded, '식당의 SDR 센서가 2.4 GHz 대역에서 끊기지 않는 무선 신호를 찾아 몰카를 의심해요'),
       (Icons.center_focus_strong_rounded, '카메라 조준선 안에 책상 밑의 빨간 LED와 검은 카메라 몸체를 담아요'),
-      (Icons.photo_camera_rounded, '촬영 버튼을 누르면 AI가 불빛을 분석해 몰카인지 판정해요'),
+      (Icons.photo_camera_rounded, '촬영 버튼을 누르면 검은 몸체 · 렌즈 · 켜진 LED · 붉은 불빛이 모두 보여야 몰카로 판정해요'),
       (Icons.sentiment_very_satisfied_rounded, '인식되면 몰카가 수거되고 센서룸 화면에서 귀신이 잡혀요'),
     ];
     return Card(
